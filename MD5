@@ -1,0 +1,15 @@
+9c40f42a5989e477a2e0d894cbac2757 *DESCRIPTION
+a3b19299b7fc440dd92238b434e9c6e0 *NAMESPACE
+18c99816c55c56f267942be60b620d10 *NEWS.md
+df47e270f7abc2b94410232bd20ea892 *R/confirm.det.R
+1c3ab3eafce9bd11b59ead9326f30eef *R/initialdets.R
+26961ce24667bb9a741c18cff6c8567b *R/makedetguide.R
+cf83db36f4e85fbd0a24f4aba2e05e40 *R/parsedetguide.R
+383eb763ad9fa414776911d1704add8b *R/size.predictor.R
+6cb809b7aacff1902d223ee6b22aa574 *R/test.in.order.R
+f81b57cd0f5cda29c5dec72b40762699 *build/vignette.rds
+7060ec85a1fde62fb7e661ef2a2a1d66 *inst/doc/background.Rmd
+5af1f9b823efe85ebb927f70d790207e *inst/doc/background.html
+f49878c6fa8f4749a17214cf1c4064a3 *man/confirm.det.Rd
+d4a73f75e0a083b5bcd988120dadd010 *man/initialdets.Rd
+7060ec85a1fde62fb7e661ef2a2a1d66 *vignettes/background.Rmd
