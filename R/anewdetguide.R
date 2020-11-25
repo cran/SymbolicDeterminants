@@ -1,17 +1,19 @@
-makedetguide <-
-function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
+#' @export
+anewdetguide <-
+function(p, storage, verbose=TRUE)
 {
-     #                          makedetguide
+     #                          anewdetguide
      #
-     # VALUE     Creates det.guide.p for all p from max.created to p in input variable
+     # VALUE     Creates detguides for all p from max.created to p. max.created is variable stored in /storage directory
      #
      # INPUT    p            Matrix size (pxp) for wanted symbolic representation of determinant
-     #          storage      Name of directory for storage of detguides. tempdir() causes loss of detguides created in this session.
-     #                       Recommend to select a different name. This function will create it if it doesn't already exist
+     #          storage      Quoted name of directory for storage of detguides. 
      #
-     #          diagnose     Logical. T causes printing of diagnostic content
-     #          verbose      Logical. T causes printing of program ID before and after running.
+     #          verbose     Logical. TRUE causes printing of program ID before and after running.
      #
+     # DETAILS  Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
+     #              If storage directory is in same folder as R Workspace, storage=".\\name" is sufficient.
+     #  
      MC <- match.call()
      if(verbose) {
           print("", quote = FALSE)
@@ -24,8 +26,30 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
           print("", quote = FALSE)
      }
      oldmax <- paste(storage, "max.created.txt", sep="/")
+     if(!file.exists(oldmax)){
+          ###########################
+          # Start with 2x2 detguide #
+          ###########################
+          print("********************************************", quote=FALSE)
+          print("Preparing detguide for p=2", quote=FALSE)
+          print("", quote = FALSE)
+          out2 <- vector("list",2)
+          out2[[1]] <- vector("list",1)
+          out2[[2]] <- vector("list",1)
+          Plus <- matrix(c(1,1,2,2),2,2,byrow=TRUE)
+          Minus <- matrix(c(1,2,2,1),2,2,byrow=TRUE)
+          out2[[1]][[1]] <- Plus
+          out2[[2]][[1]] <- Minus
+          det.location <- paste(storage, 2, sep="/")
+          dir.create(det.location, recursive=TRUE)
+          dump(list="out2", file=paste(det.location,"detguide.txt",sep="/"))
+
+          max.created <- 2
+          dumpfile <- paste(storage, "max.created.txt", sep="/")
+          dump(list="max.created",file=dumpfile)
+     }
      max.created <- source(oldmax)[[1]]
-     if(p <= max.created)stop("Requested detguide p is less than or equal to max.created")
+     if(p <= max.created)stop("Detguide for requested value of p already exists")
      #
      ##################################################
      # Determine sequence of det.guides to be created #
@@ -33,7 +57,7 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
      ##################################################
      for(pi in (max.created+1):p){
           print("********************************************", quote=FALSE)
-          print(paste("Preparing det.guide.",pi,sep=""), quote=FALSE)
+          print(paste("Preparing detguide for p=",pi,sep=""), quote=FALSE)
           print("", quote = FALSE)
 
           mi <- rep(1:pi,each=pi)
@@ -41,14 +65,10 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
           xp <- as.matrix(data.frame(mi,mj))
           guidename <- paste(storage, pi-1, "detguide.txt", sep="/")
           topguide <- source(guidename)[[1]]
-                     if(diagnose){Hmisc::prn(guidename)
-                          Hmisc::prn(length(topguide[[1]])) 
-                     }
           #####################################################
           # Reverse structure of topguide to [[nlevels   [[2  #
           #####################################################
           nlevels <- length(topguide[[1]])
-                       if(diagnose)Hmisc::prn(nlevels)
           uu <- vector("list",nlevels)
           for(m in 1:nlevels){
                uu[[m]] <- vector("list",2)
@@ -57,8 +77,7 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                }   #  r
           }  #   m
           topguide <- uu
-                        if(diagnose){Hmisc::prn(guidename)
-                        }
+          #
           #####################################################
           # xpsmall is the structure of a matrix of size pi-1 #
           #####################################################
@@ -90,7 +109,6 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                     # Match rows of amatrix to those of guide to determine Plus and Minus #
                     # Reorder rows of amatrix into 2 groups: Plus and Minus               #
                     #######################################################################
-#                                   if(diagnose)Hmisc::prn(amatrix)
                     dim1 <- dim(amatrix)[1]
                     dimg2 <- dim(guide[[1]])[1]
                     PlusMinus <- rep(0,dim1)
@@ -105,7 +123,6 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                     }
                     PlusMinus[index2] <- 1
                     bmatrix1 <- cbind(amatrix,PlusMinus)
-                            if(diagnose)Hmisc::prn(bmatrix1)
                     index2 <- rep(FALSE,dim1)
                     index3 <- rep(FALSE,dimg2)
                     for(ti in 1:dim1){
@@ -121,9 +138,6 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                     outjMinus <- bmatrix2[bmatrix2[,3]==-1,]
                     outjPlus <- outjPlus[,1:2]
                     outjMinus <- outjMinus[,1:2]
-                            if(diagnose){Hmisc::prn(j)
-                                Hmisc::prn(xp)
-                            }
                     Di <- rbind(c(1,j),outjPlus)
                     Ei <- rbind(c(1,j),outjMinus)
                     if(uu!=j){
@@ -132,14 +146,7 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                          tempout[[j]] <- list(Ei,Di)
                     }
                }   #for j          
-                            if(diagnose){Hmisc::prn(tempout)
-                                     Hmisc::prn(m)
-                              }
                out[[m]] <- tempout
-                              if(diagnose){
-                                  headout <- utils::head(out)
-                                  Hmisc::prn(headout)
-                              }
           }   #  for m 1 to nlevels
           #
           #################################################################################
@@ -157,10 +164,6 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                     jj <- jj + 1
                }   # j
           }   #  i
-                               if(diagnose){
-                                      headout2 <- utils::head(out2)
-                                      Hmisc::prn(out2)
-                               }
          #
          ###############################################
           # Reverse out2 to latest format:[[2 [[nlevels #
@@ -190,7 +193,7 @@ function(p, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
      #
      if(verbose) {
           print("", quote = FALSE)
-          print("Finished running makedetguide", quote = FALSE)
+          print("Finished running anewdetguide", quote = FALSE)
           print("", quote = FALSE)
           print(date(), quote = FALSE)
           print("", quote = FALSE)

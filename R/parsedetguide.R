@@ -1,19 +1,21 @@
+#' export
 parsedetguide <-
-function(p, symmetric=FALSE, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
+function(p, storage, symmetric=FALSE, verbose=TRUE)
 {
      #                          parsedetguide
      #
-     # VALUE       Symbolic representation of the determinant of a pxp matrix made from det.guide.p.  det.guide.p is created 
-     #             from initialize( ) function for p <= 5 and from makedetguide( ) function otherwise.
+     # VALUE       Symbolic representation of the determinant of a pxp matrix made from detguide.  detguide for p is created 
+     #             by makedetguide( ) function.
      #
-     # INPUT    p            Size of square matrix (p x p) for which determinant is needed.
+     # INPUT    p            Size of square matrix (p x p) for which determinant is wanted. (p > 2)
+     #          storage      Quoted name of directory for storage of detguides. 
      #          symmetric    TRUE, if determinant for symmetric matrix is wanted.  
-     #          storage      Name of directory for storage of detguides. tempdir() causes loss of detguides created in this session.
-     #                       Recommend to select a different name. This function will create it if it doesn't already exist
      #
-     #          diagnose     TRUE causes printing of diagnostic content
-     #          verbose      TRUE causes printing of program ID before and after running.
+     #          verbose     Logical. T causes printing of program ID before and after running.
      #
+     # DETAILS  Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
+     #              If storage directory is in same folder as R Workspace, storage=".\\name" is sufficient.
+     #  
      MC <- match.call()
      if(verbose) {
           print("", quote = FALSE)
@@ -28,7 +30,7 @@ function(p, symmetric=FALSE, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
      #############################################
      # Confirm that the input parameters conform #
      #############################################
-     if(p < 2) stop("p must be an integer greater than 1")
+     if(p < 3) stop("p must be an integer greater than 2")
      if(floor(p) != p)stop("p must be an integer")
 
      oldmax <- paste(storage, "max.created.txt", sep="/")
@@ -37,10 +39,10 @@ function(p, symmetric=FALSE, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
      if(p > 99) stop("Sorry, but the largest determinant we can print is for p = 99")
 
      linereturn <- "\n"
-     nlinesets <- prod(3:p)
+     nlinesets <- prod(3:p)    # p! /2
      #
      #######################################################
-     # Input det.guide from storage subdirectory           #
+     # Input detguide from storage subdirectory            #
      # Run separate routines depending on symmetric or not #
      # mat is the list that defines a determinant          #
      #######################################################
@@ -56,7 +58,6 @@ function(p, symmetric=FALSE, storage=tempdir(), diagnose=FALSE, verbose=TRUE)
                     vv1 <- vv[,1]
                     vv2 <- vv[,2]
                     vv[vv1==vv2,1] <- -300 + vv[vv1==vv2,1]
-
 
                     matrev <- vv[,c(2,1)]
                     index <- vv[,1] > vv[,2]

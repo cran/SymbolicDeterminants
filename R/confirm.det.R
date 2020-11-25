@@ -1,22 +1,22 @@
 #' @export
 confirm.det <-
-function(x=NULL, p, storage=tempdir(), verbose=TRUE)
+function(x=NULL, p, storage, verbose=TRUE)
 {
      #                          confirm.det
      #
      # VALUE    Two calculations of matrix determinant, the first by product of eigenvalues 
      #          and the second by evaluating of guide of symbolic determinant.
      #
-     # INPUT    x            Square matrix of known numbers. If NULL, random comparitor created here.
+     # INPUT    x            Square matrix of known numbers. If NULL, random comparitor is created here.
      #          p            Size of matrix (pxp) for which symbolic representation of determinant 
-     #                          has been prepared.  Same size as x
-     #                       Usually prepared by initialize() or make.guide() function. 
-     #          storage      Name of directory for storage of detguides. tempdir() causes loss of detguides created in this session.
-     #                       Recommend to select a different name. This function will create it if it doesn't already exist
+     #                          has been prepared.  Same size as x.  Prepared by makedetguide() function. 
+     #          storage      Quoted name of directory for storage of detguides. 
      #
-     #          diagnose    Logical. T causes printing of diagnostic content
      #          verbose     Logical. T causes printing of program ID before and after running.
      #
+     # DETAILS  Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
+     #              If storage directory "name" is in same folder as R Workspace, storage=".\\name" is sufficient.
+     #  
      MC <- match.call()
      if(verbose) {
           print("", quote = F)
@@ -29,6 +29,7 @@ function(x=NULL, p, storage=tempdir(), verbose=TRUE)
           print("", quote = F)
      }
      detfile <- paste(storage,p,"detguide.txt",sep="/")
+     if(!file.exists(detfile)){stop("makedetfile must be run before you can confirm same results")}
      y <- source(detfile)[[1]]
      dimy <- dim(y[[1]][[1]])[1]
      ####################
@@ -86,8 +87,8 @@ function(x=NULL, p, storage=tempdir(), verbose=TRUE)
      ########################
      print("Comparing determinants", quote=FALSE)
      print("", quote = FALSE)
-     print(paste("By eigenvalues ",detx))
-     print(paste("By symbolic rep",dety))
+     print(paste("By eigenvalues ",detx), quote = FALSE)
+     print(paste("By symbolic rep",dety), quote = FALSE)
      #
      if(verbose) {
           print("", quote = FALSE)

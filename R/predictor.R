@@ -1,19 +1,18 @@
-size.predictor <-
-function(p, diagnose=FALSE, verbose=TRUE)
+#' @export
+predictor <-
+function(p, verbose=TRUE)
 {
-     #                          size.predictor
+     #                          predictor
      #
      # VALUE    Size of various attributes of symbolic representation of general matrix
      #
-     # INPUT    p      Size of matrix (pxp)
-     #
-     #          diagnose     Logical. T causes printing of diagnostic content
-     #          verbose     Logical. T causes printing of program ID before and after running.
+     # INPUT    p            Size of matrix (pxp)
+     #          verbose      Logical. T causes printing of program ID before and after running.
      #
      MC <- match.call()
      if(verbose) {
           print("", quote = F)
-          print("Running size.predictor", quote = F)
+          print("Running predictor", quote = F)
           print("", quote = F)
           print(date(), quote = F)
           print("", quote = F)
@@ -28,11 +27,10 @@ function(p, diagnose=FALSE, verbose=TRUE)
      #############################################
      if(p < 2) stop("p must be an integer greater than 1")
      if(floor(p) != p)stop("p must be an integer")
-     if(p > 999) stop("Sorry, but the largest determinant we can print is for p = 999")
      #
-     #######################################################
+     ########################################
      # Set up and print general information #
-     #######################################################
+     ########################################
      line1 <- "The symbolic representation (formula) for the determinant of a pxp matrix is a sum" 
      line2 <- "of p! terms, half of which have a +1 coefficient and half of which have a -1 coefficient."
      line3 <- "Each term is the product of p elements of the matrix. A term can appear only once in each"
@@ -70,7 +68,7 @@ function(p, diagnose=FALSE, verbose=TRUE)
      #
      if(verbose) {
           print("", quote = F)
-          print("Finished running size.predictor", quote = F)
+          print("Finished running predictor", quote = F)
           print("", quote = F)
           print(date(), quote = F)
           print("", quote = F)

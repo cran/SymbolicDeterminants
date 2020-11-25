@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="William R. Fairweather" />
 
+<meta name="date" content="2020-11-15" />
 
-<title>background.utf8</title>
+<title>Background</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -374,65 +376,166 @@ summary {
 
 
 
+<h1 class="title toc-ignore">Background</h1>
+<h4 class="author">William R. Fairweather</h4>
+<h4 class="date">11/15/2020</h4>
 
 </div>
 
 
-<p><code>{r, include = FALSE} knitr::opts_chunk$set(   collapse = TRUE,   comment = &quot;#&gt;&quot; )</code></p>
-<div id="r-setup-librarysymbolicdeterminants" class="section level2">
-<h2><code>{r setup} library(SymbolicDeterminants)</code></h2>
-<p>-–</p>
-<p>title: ‘Background: Symbolic Representation of the Determinant of a Square Matrix’</p>
-<p>author: “William R. Fairweather”</p>
-<p>date: “‘r Sys.Date()’”</p>
-<p>output: rmarkdown::html_vignette</p>
-<p>vignette: &gt;</p>
+<p><code>{r setup, include=FALSE} knitr::opts_chunk$set(echo = FALSE)</code> vignette: \&gt;</p>
 <p>%</p>
 <p>%</p>
 <p>}</p>
-<p>-–</p>
-</div>
-<div id="determinants" class="section level1">
-<h1>Determinants</h1>
-<p>The determinant of a square matrix can be calculated easily by multiplying the eigenvalues together. The R function eigen() will produce both the eigenvectors and the eigenvalues. However, up until now there does not seem to be an R function that produces the formula for calculating the determinant, as a function of the elements of the matrix. This formula is called the symbolic representation of the determinant. In other words, for the 2x2 matrix V2 we want a function to return “v11 v22 – v12 v21“ for an unstructured, general 2x2 matrix and “v11 v22 – v12^2 “ for a symmetric 2x2 matrix, and not the numeric values for a particular numeric matrix.</p>
-<p>The determinant of a pxp square matrix is an algebraic sum of p! (p-factorial) terms, half of which have a coefficient of +1 and half of which have a coefficient of -1. Each of the terms is a product of exactly p of the elements of the matrix. In the general case, when the matrix is not further structured, each of the matrix elements is linear. There are no replications of the elements of the matrix in each of the products and there are no replications of any of the products in the sum that makes up the determinant.</p>
-<p>In addition to the general case, we are interested in the case in which the matrix is symmetric. Here, some of the matrix elements in a product can be duplicated because both vij and vji are present in that product. It is also possible that some of the product terms are duplicated when vij appears in one term and vji appears in another term along with the same collection of the other p-1 elements in each term.</p>
-</div>
-<div id="objective" class="section level1">
-<h1>Objective</h1>
-<p>Our objective is to provide functions that will return the most efficient symbolic representation of the determinant of any pxp matrix, whether general or symmetric.</p>
-</div>
-<div id="the-detguide" class="section level1">
-<h1>The detguide</h1>
-<p>We first construct a guide for printing the symbolic representation of the determinant of a general pxp matrix, Vp. The ij-th element of Vp raised to a power k, vijk , can be represented as a row vector (i,j,k). The product of p such terms can be represented as a p x 3 matrix. The sum of p!/2 such products can be represented as matrices in p!/2 levels of a list.</p>
-<p>A determinant is the difference between two such sums. That is, a detguide can be constructed as a list of 2 levels, each of which is a list of p!/2 levels. (A determinant always has the same number of positive terms and negative terms.) Knowing that a list has this structure, we can produce the symbolic representation as a text of 3 lines: the exponents, repetitions of the letter v, and the subscripts. This is the basis of the symbolic representation produced by this package.</p>
-<p>For a 2x2 matrix one “negative” term(v12 v21) is subtracted from one “positive” term (v11 v22). The labels of “positive” and “negative” do not apply to the value of the elements; rather, it refers to the algebraic formula of the calculation: “negative” terms will receive a leading minus sign when the term is parsed/printed.</p>
-<p>A 3x3 matrix has 9 elements. In calculating the determinant for a 3x3 matrix, each of the elements of the first row is multiplied by its 2x2 cofactor. Each cofactor, in turn, consists of a positive and a negative term so that there are a total of 3 positive products and 3 negative products. It is necessary to take the position of the 3x3 matrix element into account in determining the “positivity” of subparts of the cofactor terms. For a positive term of the 3x3 matrix, the positive and negative terms of its cofactor remain positive and negative, respectively. For a negative term of the 3x3 matrix, the positive and negative terms of its cofactor are switched to be negative and positive terms, respectively.</p>
-<p>Similarly, a 4x4 matrix has 16 elements, and each of the elements in the first row is multiplied by a cofactor that has 3 positive and 3 negative terms, so that the determinant of the 4x4 matrix has a total of 12 positive and 12 negative terms. The 3 positive and 3 negative terms of each cofactor are all either maintained or reversed, depending on the positivity of the multiplier term of the 4x4 matrix.</p>
-<p>The determinant of a 5x5 matrix has 25 elements, so the ultimate number of terms in the determinant is 60 positive and 60 negative terms. Each term is the product of 5 elements of the matrix.</p>
-<p>The result of multiplying a matrix element and its cofactor is represented by binding the row representation of the element to the matrix of each term in the determinant of the cofactor. Attention must be paid to the sign of the element in the formula. The sign is not shown in the detguide; rather, positive products are placed into the first sub-element of the list and negative elements are placed in the second sub-element. Products receive their sign from the function that parses the detguide (see below).</p>
-<p>For each p only the detguide for the general matrix (not for the symmetric) is stored. The effect of symmetry on the symbolic representation is effected when the detguide is parsed.</p>
-</div>
-<div id="parsing-the-detguide-the-symbolic-representation" class="section level1">
-<h1>Parsing the detguide: the symbolic representation</h1>
-<p>The textual representation of the determinant of Vp is created directly from the detguide of the pxp matrix. That is, it is not necessary first to parse the determinants of matrices of smaller size within it.</p>
-<p>The most basic symbolic representation is a simple listing of each product of the determinant with a leading + or – sign. It is useful to order these so as to make it easier to identify patterns of elements or of products.</p>
-</div>
-<div id="challenges" class="section level1">
-<h1>Challenges</h1>
-<p>Detguides and their symbolic representations can become extremely large as p gets large. Detguides are produced iteratively, so each must be stored in order to produce the next larger one quickly. Accordingly, methods must be developed to limit the size of detguides, and they are stored in a permanent file of the user’s choosing and not in the R workspace.</p>
-<p>After a large detguide is created, it is difficult to know if it is functionally correct. That is, would its application to a numeric matrix of the same size yield a value equal to the product of its eigenvalues calculated in the usual way? See the description of the function, confirm.det and the README file.</p>
-<p>For symmetric matrices, as p increases the product terms become more complicated. Instead of strictly linear elements, some of these may be quadratic. It is not possible for any diagonal element of the matrix to appear more than once in any product, so diagonal terms can never be squared in any product. If p=3, there can be only 1 quadratic element in a product. If p=4, there can be none, 1, or 2 quadratic terms. In general, there can be none, 1, 2, …, floor(p/2) quadratic elements. The symbolic representation would treat each of these groups as separate forms.</p>
-</div>
-<div id="use-of-the-functions-included-in-the-package" class="section level1">
-<h1>Use of the functions included in the package</h1>
+<p> </p>
+<p>Determinants</p>
+<p>============</p>
+<p> </p>
+<p>The determinant of a square matrix can be calculated easily by multiplying the</p>
+<p>eigenvalues together, for example those produced by the R function eigen().</p>
+<p>However, until now there does not seem to be an R function that produces the</p>
+<p>formula for calculating the determinant, as a function of the elements of the</p>
+<p>matrix.</p>
+<p>This formula is called the symbolic representation of the determinant. In other</p>
+<p>words, for the 2x2 matrix <span class="math display">\[V[2]\]</span> we want a function to return <span class="math display">\[v_{11}v_{22} -
+v_{12}v_{21}\]</span></p>
+<p>for an unstructured, general 2x2 matrix and <span class="math display">\[v_{11}v_{22} - v^2_{12}\]</span> for a</p>
+<p>symmetric 2x2 matrix, and not the numeric values for a particular numeric matrix.</p>
+<p> </p>
+<p>The determinant of a pxp square matrix is an algebraic sum of p! (p-factorial)</p>
+<p>terms, half of which have a coefficient of +1 and half of which have a</p>
+<p>coefficient of -1. Each of the terms is a product of exactly p of the elements</p>
+<p>of the matrix. In the general case, when the matrix is not further structured,</p>
+<p>each of the matrix elements is linear. There are no replications of the elements</p>
+<p>of the matrix in each of the products and there are no replications of any of</p>
+<p>the products in the sum that makes up the determinant.</p>
+<p> </p>
+<p>In addition to the general case, we are interested in the case in which the</p>
+<p>matrix is symmetric. Here, some of the matrix elements in a product can be</p>
+<p>duplicated because both vij and vji are present in that product. It is also</p>
+<p>possible that some of the product terms are duplicated when <span class="math display">\[v_{ij}\]</span> appears in one</p>
+<p>term and <span class="math display">\[v_{ji}\]</span> appears in another term along with the same collection of the other</p>
+<p>p-1 elements in each term.</p>
+<p> </p>
+<p>Objective</p>
+<p>=========</p>
+<p> </p>
+<p>Our objective is to provide functions that will return the most efficient</p>
+<p>symbolic representation of the determinant of any pxp matrix, whether general or</p>
+<p>symmetric.</p>
+<p> </p>
+<p>The detguide</p>
+<p>============</p>
+<p> </p>
+<p>We first construct a guide for printing the symbolic representation of the</p>
+<p>determinant of a general pxp matrix, <span class="math display">\[V_{p}\]</span>. The ij-th element of <span class="math display">\[V_{p}\]</span> raised to a</p>
+<p>power k, <span class="math display">\[v^k_{ij}\]</span> , can be represented as a row vector (i,j,k). The product of p</p>
+<p>such terms can be represented as a p x 3 matrix. The sum of p!/2 such products</p>
+<p>can be represented as matrices in p!/2 levels of a list.</p>
+<p> </p>
+<p>A determinant is the difference between two such sums. That is, a detguide can</p>
+<p>be constructed as a list of 2 levels, each of which is a list of p!/2 levels. (A</p>
+<p>determinant always has the same number of positive terms and negative terms.)</p>
+<p>Knowing that a list has this structure, we can produce the symbolic</p>
+<p>representation as a text of 3 lines: the exponents, repetitions of the letter v,</p>
+<p>and the subscripts. This is the basis of the symbolic representation produced by</p>
+<p>this package.</p>
+<p> </p>
+<p>For a 2x2 matrix one “negative” term(<span class="math display">\[v_{12}v_{21}\]</span>) is subtracted from one “positive”</p>
+<p>term (<span class="math display">\[v_{11}v_{22}\]</span>). The labels of “positive” and “negative” do not apply to the</p>
+<p>value of the elements; rather, it refers to the algebraic formula of the</p>
+<p>calculation: “negative” terms will receive a leading minus sign when the term is</p>
+<p>parsed/printed.</p>
+<p> </p>
+<p>A 3x3 matrix has 9 elements. In calculating the determinant for a 3x3 matrix,</p>
+<p>each of the elements of the first row is multiplied by its 2x2 cofactor. Each</p>
+<p>cofactor, in turn, consists of a positive and a negative term so that there are</p>
+<p>a total of 3 positive products and 3 negative products. It is necessary to take</p>
+<p>the position of the 3x3 matrix element into account in determining the</p>
+<p>“positivity” of subparts of the cofactor terms. For a positive term of the 3x3</p>
+<p>matrix, the positive and negative terms of its cofactor remain positive and</p>
+<p>negative, respectively. For a negative term of the 3x3 matrix, the positive and</p>
+<p>negative terms of its cofactor are switched to be negative and positive terms,</p>
+<p>respectively.</p>
+<p> </p>
+<p>Similarly, a 4x4 matrix has 16 elements, and each of the elements in the first</p>
+<p>row is multiplied by a cofactor that has 3 positive and 3 negative terms, so</p>
+<p>that the determinant of the 4x4 matrix has a total of 12 positive and 12</p>
+<p>negative terms. The 3 positive and 3 negative terms of each cofactor are all</p>
+<p>either maintained or reversed, depending on the positivity of the multiplier</p>
+<p>term of the 4x4 matrix.</p>
+<p> </p>
+<p>The determinant of a 5x5 matrix has 25 elements, so the ultimate number of terms</p>
+<p>in the determinant is 60 positive and 60 negative terms. Each term is the</p>
+<p>product of 5 elements of the matrix.</p>
+<p> </p>
+<p>The result of multiplying a matrix element and its cofactor is represented by</p>
+<p>binding the row representation of the element to the matrix of each term in the</p>
+<p>determinant of the cofactor. Attention must be paid to the sign of the element</p>
+<p>in the formula. The sign is not shown in the detguide; rather, positive products</p>
+<p>are placed into the first sub-element of the list and negative elements are</p>
+<p>placed in the second sub-element. Products receive their sign from the function</p>
+<p>that parses the detguide (see below).</p>
+<p> </p>
+<p>For each p only the detguide for the general matrix (not for the symmetric) is</p>
+<p>stored. The effect of symmetry on the symbolic representation is effected when</p>
+<p>the detguide is parsed.</p>
+<p> </p>
+<p>Parsing the detguide: the symbolic representation</p>
+<p>=================================================</p>
+<p> </p>
+<p>The textual representation of the determinant of <span class="math display">\[V_{p}\]</span> is created directly from the</p>
+<p>detguide of the pxp matrix. That is, it is not necessary first to parse the</p>
+<p>determinants of matrices of smaller size within it.</p>
+<p> </p>
+<p>The most basic symbolic representation is a simple listing of each product of</p>
+<p>the determinant with a leading + or – sign. It is useful to order these so as to</p>
+<p>make it easier to identify patterns of elements or of products.</p>
+<p> </p>
+<p>Challenges</p>
+<p>==========</p>
+<p> </p>
+<p>Detguides and their symbolic representations can become extremely large as p</p>
+<p>gets large. Detguides are produced iteratively, so each must be stored in order</p>
+<p>to produce the next larger one quickly. Accordingly, methods must be developed</p>
+<p>to limit the size of detguides, and they are stored by functions in this package</p>
+<p>in a permanent file of the user’s choosing and not in the R workspace.</p>
+<p> </p>
+<p>After a large detguide is created, it is difficult to know if it is functionally</p>
+<p>correct. That is, would its application to a numeric matrix of the same size</p>
+<p>yield a value equal to the product of its eigenvalues calculated in the usual</p>
+<p>way? See the description of the function, confirm.det() and the README file.</p>
+<p> </p>
+<p>For symmetric matrices, as p increases the product terms become more</p>
+<p>complicated. Instead of strictly linear elements, some of these may be</p>
+<p>quadratic. It is not possible for any diagonal element of the matrix to appear</p>
+<p>more than once in any product, so diagonal terms can never be squared in any</p>
+<p>product. If p=3, there can be only 1 quadratic element in a product. If p=4,</p>
+<p>there can be none, 1, or 2 quadratic terms. In general, there can be none, 1, 2,</p>
+<p>…, floor(p/2) quadratic elements. The symbolic representation would treat each</p>
+<p>of these groups as separate forms.</p>
+<p> </p>
+<p>Use of the functions included in the package</p>
+<p>============================================</p>
+<p> </p>
 <p>Please see the README file.</p>
-</div>
-<div id="discussion" class="section level1">
-<h1>Discussion</h1>
-<p>In this version of the package, we are aware of only a few possible forms and that some products can appear twice in the detguide of symmetric matrices. As we gain experience with larger and larger values of p, it is possible (for example) that products could appear even 4 times in a symbolic representation (doubling the presence of products that appear twice for smaller p). We would expect to modify the <em>parsedetguide</em>( ) function to accommodate this. The parsedetguide( ) function includes a coefficient of 2 for product terms that are doubled. For such terms, the original line number is maintained (with the second line skipped).</p>
-<p>Parsing the detguide is the end result of these calculations. New explorations into the structure of determinants should be conducted on the detguide, not on the parsed, textual version.</p>
-</div>
+<p> </p>
+<p>Discussion</p>
+<p>==========</p>
+<p> </p>
+<p>In this version of the package, we are aware of only a few possible forms and</p>
+<p>that some products can appear twice in the detguide of symmetric matrices. As we</p>
+<p>gain experience with larger and larger values of p, it is possible (for example)</p>
+<p>that products could appear even 4 times in a symbolic representation (doubling</p>
+<p>the presence of products that appear twice for smaller p). We would expect to</p>
+<p>modify the *parsedetguide( )* function to accommodate this. The *parsedetguide( )*</p>
+<p>function includes a coefficient of 2 for product terms that are doubled. For</p>
+<p>such terms, the original line number is maintained (with the second line</p>
+<p>skipped).</p>
+<p> </p>
+<p>Parsing the detguide is the end result of these calculations. New explorations</p>
+<p>into the structure of determinants should be conducted on the detguide, not on</p>
+<p>the parsed, textual version.</p>
 
 
 
