@@ -3,5 +3,7 @@
 export(anewdetguide)
 export(confirm.det)
 export(detindex)
+export(parsedetguide)
 export(predictor)
 export(retrieve)
+importFrom(utils,browseURL)

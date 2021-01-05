@@ -8,7 +8,7 @@ detindex(storage, verbose=TRUE)
 }
 \arguments{
   \item{storage}{Quoted name of storage directory}
-  \item{verbose }{Logical. TRUE" causes printing of function ID before and after running}
+  \item{verbose }{Logical. TRUE causes printing of function ID before and after running}
 }
 \details{Provide full path in storage, using double backslashes.  Example:  storage="c:/determinants".  
    If storage directory "name" is in same folder as R Workspace, storage="./name" is sufficient.

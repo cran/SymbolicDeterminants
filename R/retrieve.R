@@ -1,6 +1,6 @@
 #' @export
 retrieve <-
-function(p, storage, verbose=TRUE)
+function(p, storage, browser="Microsoft Edge", verbose=TRUE)
 {
      #                          retrieve
      #
@@ -9,7 +9,8 @@ function(p, storage, verbose=TRUE)
      #
      # INPUT     p            Size of matrix (pxp) 
      #           storage      Quoted name of directory for storage of detguides. 
-     #
+     #           browser      Non-empty character string giving the name of the program to be used as the URL browser, for 
+     #                            Windows operating system NULL is OK     #
      #           verbose      Logical. T causes printing of program ID before and after running.
      #
      # DETAILS  Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
@@ -58,12 +59,13 @@ function(p, storage, verbose=TRUE)
                out <- out[[1]]
           }
           if(jj=="2"){
-               store <- paste(store,"parseguide.txt",sep="/")
-               fs::file_show(path = store)
+               store <- paste(store,"parseguide.htm",sep="/")
+               utils::browseURL(store, browser=browser)
           }
           if(jj=="3"){
-               store <- paste(store,"parseguidesym.txt",sep="/")
-               fs::file_show(path = store)
+               store <- paste(store,"parseguidesym.htm",sep="/")
+
+               utils::browseURL(store, browser=browser)
           }
      }    #   jj
      #

@@ -5,8 +5,8 @@
 \description{
      A determinant guide is a list of 2 levels, each of which contains a list of p!/2
      levels, which codes the use of each element of a pxp matrix in the calculation
-     of the determinant of that matrix. From the guide, the 3 or 4 line symbolic
-     representation of the determinant can be produced.
+     of the determinant of that matrix. From the guide, the symbolic representation 
+     of the determinant can be produced directly.
 }
 \usage{
    anewdetguide(p,storage,verbose=TRUE)

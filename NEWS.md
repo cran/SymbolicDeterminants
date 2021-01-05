@@ -1,4 +1,10 @@
-SymbolicDeterminants 1.2.0.9002
+SymbolicDeterminants 1.3.0
+==========================
+
+-   Improved display of symbolic representation by means of HTML and
+    use of Web browser
+
+SymbolicDeterminants 1.2.0
 ===============================
 
 -   Consolidated two functions into one and renamed it in order to ensure

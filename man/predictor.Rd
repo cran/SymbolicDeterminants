@@ -12,7 +12,7 @@ predictor(p,verbose=TRUE)
 }
 \arguments{
   \item{p}{Size of matrix (pxp)}
-  \item{verbose }{Logical. TRUE" causes printing of function ID before and after running}
+  \item{verbose }{Logical. TRUE causes printing of function ID before and after running}
 }
 \details{Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
    If storage directory is in same folder as R Workspace, storage=".\\name" is sufficient.

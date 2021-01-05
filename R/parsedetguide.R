@@ -1,15 +1,18 @@
-#' export
+#' @importFrom utils browseURL
+#' @export
 parsedetguide <-
-function(p, storage, symmetric=FALSE, verbose=TRUE)
+function(p, storage, browser="Microsoft Edge", symmetric=FALSE, verbose=TRUE)
 {
      #                          parsedetguide
      #
      # VALUE       Symbolic representation of the determinant of a pxp matrix made from detguide.  detguide for p is created 
-     #             by makedetguide( ) function.
+     #             by anewdetguide( ) function.
      #
      # INPUT    p            Size of square matrix (p x p) for which determinant is wanted. (p > 2)
      #          storage      Quoted name of directory for storage of detguides. 
-     #          symmetric    TRUE, if determinant for symmetric matrix is wanted.  
+     #          browser      Non-empty character string giving the name of the program to be used as the URL browser, for 
+     #                            Windows operating system NULL is OK
+     #          symmetric    TRUE, if representation of determinant for symmetric matrix is wanted.  
      #
      #          verbose     Logical. T causes printing of program ID before and after running.
      #
@@ -19,7 +22,7 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
      MC <- match.call()
      if(verbose) {
           print("", quote = FALSE)
-          print("Running parsedetguide", quote = FALSE)
+          print("Running parsedetguide", quote = FALSE) 
           print("", quote = FALSE)
           print(date(), quote = FALSE)
           print("", quote = FALSE)
@@ -27,7 +30,65 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
           print(MC)
           print("", quote = FALSE)
      }
+     #########################################################
+     # Support functions for printing of element and product #
+     #########################################################
+     my.html.element <- function(i, j, k=NULL, p, verbose=FALSE)
+     {
+          # VALUE      Mathematical expression of element of matrix V, possibly raised to power
+          #
+          # INPUT      i          row
+          #            j          column
+          #            k          exponent
+          #            p          size of matrix (pxp)
+          #
+          # NOTE:  This is a support function used in parsing detguides.
+          #        If p > 9, subscripts will contain a comma to separate row from column.
+          #        </title down to <body>  and  </body> to </html> are written to file outside of this function. 
+          #
+          if(p < 10){
+               out <- paste("v<sup>", k, "</sup><sub>", i, j, "</sub>", sep="")
+               if(is.null(k))out <- paste("v<sub>", i, j, "</sub>", sep="")
+          } else{
+               out <- paste("v<sup>", k, "</sup><sub>", i,",", j, "</sub>", sep="")
+               if(is.null(k))out <- paste("v<sub>", i, ",",j, "</sub>", sep="")
+          }
+          out <- paste(out,"&nbsp; ",sep="")
+     out
+     }
+     # 
+     #
+     my.html.product <- function(x)
+     {
+          #
+          # VALUE      HTML code for the product of matrx elements that constitute a line of the determinant.
+          #
+          # INPUT    x   Matrix from a detguide.  x is px2 or px3, depending on whether there is no exponent or there is
+          dimx <- dim(x)
+          p <- dimx[1]
+          out <- NULL
+          for(n in 1:p){
+               if(dimx[2]==2){
+               out <- paste(out, my.html.element(i=x[n,1], j=x[n,2], p=p), sep="") 
+               }else{
+                    if(x[n,3] > 0){ 
+                         # skip element if exponent = 0 and leave exponent blank if exponent = 1
+                         if( x[n,3]==1){
+                              out <- paste(out, my.html.element(i=x[n,1], j=x[n,2], k=NULL, p=p), sep="") 
+                         }else{
+                              out <- paste(out, my.html.element(i=x[n,1], j=x[n,2], k=x[n,3], p=p), sep="") 
+                         }
+                    }  #  if
+               }       #  else
+          }            #  for 1:p
+          out
+     }
+     #########################
+     # End support functions #
+     #########################
+
      #############################################
+     # Main program starts here                  #
      # Confirm that the input parameters conform #
      #############################################
      if(p < 3) stop("p must be an integer greater than 2")
@@ -36,7 +97,6 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
      oldmax <- paste(storage, "max.created.txt", sep="/")
      max.created <- source(oldmax)[[1]]
      if(p > max.created)stop(paste("The largest detguide created so far is for p =", max.created)) 
-     if(p > 99) stop("Sorry, but the largest determinant we can print is for p = 99")
 
      linereturn <- "\n"
      nlinesets <- prod(3:p)    # p! /2
@@ -52,20 +112,20 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
           for(j in 1:2){
                for(m in 1:nlinesets){
                     vv <- mat[[j]][[m]]
-                    ##################################################################### 
-                    # Ensure that all diagonal terms will print on left of each product #
-                    ##################################################################### 
+                    ################################################### 
+                    # Convert unstructured matrix to symmetric matrix #
+                    ###################################################
                     vv1 <- vv[,1]
                     vv2 <- vv[,2]
-                    vv[vv1==vv2,1] <- -300 + vv[vv1==vv2,1]
-
                     matrev <- vv[,c(2,1)]
                     index <- vv[,1] > vv[,2]
                     vv[index,] <- matrev[index,]
-                    vv <- cbind(vv,1)
-                    vv <- vv[order(vv[,1],vv[,2]),]
-
+                    vv <- cbind(vv,1)                       # add third column here
+                    vv <- vv[order(vv[,1],vv[,2]),]         # lexicographic order by column within row
+                    #
+                    #####################################################################################
                     # Change exponent to 2 for quadratic term; eliminate reduntant term with exponent 0 #
+                    #####################################################################################
                     if(vv[1,1]==vv[2,1] & vv[1,2]==vv[2,2])vv[1:2,3]<- c(2,0)
                     mat3 <- vv[-1,]
                     mat4 <- vv[-dim(vv)[1],]
@@ -90,9 +150,8 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
                      mat[[j]][[m]] <- uu
                 }     # m
            }        #  j
-     }  #symmetric
-     else{
-          for(m in 1:nlinesets){
+     }else{
+         for(m in 1:nlinesets){
                for(j in 1:2){
                     vv <- mat[[j]][[m]]
                     vv <- vv[order(vv[,1],vv[,2]),]
@@ -100,20 +159,14 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
                 }  # j 
            }    # m
      }    # not symmetric
-     ###############################################
-     # Set printing of linesets into 3 or 4 lines, #
-     # depending on whether symmetric matrix       #
-     # Line blocks depend on value of p            #
-     ###############################################
+     #
+     ##################################
+     # Set up each line for printing  #
+     ##################################
      primeline1 <- "   "
-     parseguide <-    paste(storage, p, "parseguide.txt" , sep="/")
-     parseguidesym <- paste(storage, p, "parseguidesym.txt",sep="/")
-     xx <- NULL
      lineno <- 1
      if(symmetric){
-          if(file.exists(parseguidesym)) file.remove(file=parseguidesym)
-          dump(xx,parseguidesym)
-          primeline2 <- " + "
+          primeline2 <- "&nbsp;+&nbsp;"
           ###############################################
           # Order by number of quadratics, then by i, j #
           ###############################################
@@ -133,7 +186,6 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
           for(m in 1:nlinesets){
                zz[[1]][[m]] <- mat[[1]][[fororder1[m,1]]]
                zz[[2]][[m]] <- mat[[2]][[fororder2[m,1]]]
-
           }   # m
           for(j in 1:2){
                for(m in 1:nlinesets){
@@ -156,7 +208,6 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
           vv1 <- vv1[-1]
           ww1 <- c(ww1==vv1, FALSE)
 
-
           ww2 <- apply(uu2,1,FUN=paste,sep=",", collapse=",")
           vv2 <- ww2
           ww2 <- ww2[-nlinesets]
@@ -172,106 +223,98 @@ function(p, storage, symmetric=FALSE, verbose=TRUE)
                     coeffs[j,2] <- 2
                     coeffs[j+1,2] <- 0
                }
-          }
-          ##########################
-          # Print the output lines #
-          ##########################
+          }    #j
           for(j in 1:2){
                for(m in 1:nlinesets){
-                 if(coeffs[m,j] != 0){
-                    augline2 <- " "
-                    if(coeffs[m,j]==2)augline2 <- "2"
-                    # Restore subscripts #
-                    ww <- mat[[j]][[m]]
-                    ww1 <- (1:p)[ww[,1]<0]
-                    ww[ww1,1] <- 300 + ww[ww1,1]
+                    if(coeffs[m,j] != 0){
+                         augline2 <- " "
+                         if(coeffs[m,j]==2)augline2 <- "2"
+                    }    #  coeffs
+               }         # m
+          }              # j
+          # No corresponding section for non symmetric matrix
+     }
+     ###################################################
+     # Set up HTML file and print symbolic determinant #
+     ###################################################
+     parseguide <-    paste(storage, p, "parseguide.htm" , sep="/")
+     parseguidesym <- paste(storage, p, "parseguidesym.htm",sep="/")
 
-                    line1 <- "    "
-                    line3 <- "    "
-                    line2 <- primeline2
-                    for(r in 1:p){
-                         if(j==1 & m==1 & r==1)line2 <- "   "
-                         wwr3 <- ww[r,3]
-                         if(wwr3==1) wwr3 <- " "
+     xx <- '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">'
+     lineno <- 1
+     if(symmetric){
+          xxhead <- paste("Symbolic Representation of the Determinant of a Real, Symmetric ", p, "x", p, " Matrix", sep="")
+          if(file.exists(parseguidesym)) file.remove(file=parseguidesym)
+          file.create(parseguidesym)
+          cat(xx,file=parseguidesym, sep=linereturn, append=TRUE)
 
-                         if(p >= 100){
-                              if(wwr3 != 0){    # block with 8 spaces
-                                 line1 <- paste(line1," ", wwr3, "      ", sep="")
-                                   line2 <- paste(line2, "v","       ", sep="")
-                                   line3 <- paste(line3, " ", ww[r,1], ",", ww[r,2],"    ", sep="")
-                              }
-                         }    # p   999
+          cat("<html>", file=parseguidesym, sep=linereturn, append=TRUE)
 
-                         if(p >= 10 & p <= 99){
-                              if(wwr3 != 0){    # block with 6 spaces
-                                   line1 <- paste(line1," ", wwr3, "    ", sep="")
-                                   line2 <- paste(line2, "v","     ", sep="")
-                                   line3 <- paste(line3, " ", ww[r,1], ",", ww[r,2],"  ", sep="")
-                              }
-                         }    #p 99
+          cat("<head>", file=parseguidesym, sep=linereturn, append=TRUE)
+          cat(xxhead, file=parseguidesym, sep=linereturn, append=TRUE)
+          cat("</head>",file=parseguidesym, sep=linereturn, append=TRUE)
 
-                         if(p <= 9){
-                              if(wwr3 != 0){   # block with 4 spaces
-                                   line1 <- paste(line1, " ", wwr3, "  ", sep="")
-                                   line2 <- paste(line2, "v","   ", sep="")
-                                   line3 <- paste(line3, " ", ww[r,1], ",", ww[r,2], sep="")
-                              }
-                              line2A <- paste(substr(line2,start=1,stop=3),augline2,substr(line2,start=4,stop=100000),sep="")
-                         }     # p 9
-                    }   # r
-                    ####################################
-                    # output allows space for exponent #
-                    ####################################
-                    line2A <- paste(line2A, "                       ", lineno)
-                    cat(c(line1,line2A,line3),sep=linereturn)
-                    cat(c(" "," "),sep=linereturn)
- 
-                    cat(c(line1,line2A,line3),file=parseguidesym,sep=linereturn,append=TRUE)
-                    cat(c(" "," "),file=parseguidesym,sep=linereturn,append=TRUE)
-                 }  #  coeffs
+          cat("<body>", file=parseguidesym, sep=linereturn, append=TRUE)
+
+          primeline2 <- "&nbsp;&nbsp;&nbsp;&nbsp;"
+          for(j in 1:2){
+               cat("<p>",file=parseguidesym, sep=linereturn, append=TRUE)
+               for(m in 1:nlinesets){
+                    ################################################################
+                    # Add coefficient 2, if needed and skip any with coefficient 0 #
+                    ################################################################
+                    if(coeffs[m,j]!=0){
+                         ww <- mat[[j]][[m]]
+                         ww <- my.html.product(ww)  
+                         if(coeffs[m,j]==2){
+                              ww <- paste("2&nbsp;", ww)
+                         }else{
+                              ww <= paste("&nbsp;&nbsp;&nbsp;",ww)
+                         } 
+                         ww <- paste(primeline2, ww, "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", lineno, "<br>", sep="")
+                         cat(ww, file=parseguidesym, sep=linereturn, append=TRUE)
+                    }
+                    if(j==1)primeline2 <- "&nbsp;+&nbsp;"
                     lineno <- lineno + 1
-              }     # m
-               primeline2 <- " - "
-          }     # j 
-     }    # symmetric
-     else{        # not symmetric
+               }      #  m
+               primeline2 <- "&nbsp;-&nbsp;"
+               cat("</p>",file=parseguidesym, sep=linereturn, append=TRUE)
+          }           #  j
+          cat("</body>", file=parseguidesym, sep=linereturn, append=TRUE)
+          cat("</html>", file=parseguidesym, sep=linereturn, append=TRUE)
+          utils::browseURL(parseguidesym, browser = browser)
+     }else{
+          xxhead <- paste("Symbolic Representation of the Determinant of a Real, ", p, "x", p, " Matrix", sep="")
           if(file.exists(parseguide)) file.remove(file=parseguide)
-          dump(xx,parseguide)
-          primeline2 <- " + "
+          file.create(parseguide)
+          cat(xx,file=parseguide, sep=linereturn, append=TRUE)
+
+          cat("<html>", file=parseguide, sep=linereturn, append=TRUE)
+          cat("<head>", file=parseguide, sep=linereturn, append=TRUE)
+          cat(xxhead, file=parseguide, sep=linereturn, append=TRUE)
+
+          cat("</head>",file=parseguide, sep=linereturn, append=TRUE)
+          cat("<body>", file=parseguide, sep=linereturn, append=TRUE)
+
+          primeline2 <- "&nbsp;&nbsp;&nbsp;&nbsp;"
           for(j in 1:2){
+               cat("<p>",file=parseguide, sep=linereturn, append=TRUE)
                for(m in 1:nlinesets){
                     ww <- mat[[j]][[m]]
-                    line1 <- line3 <- "   "
-                    line2 <- primeline2
-                    for(r in 1:p){
-                         if(j==1 & m==1 & r==1)line2 <- "   "
-
-                         if(p >= 100){
-                                   line2 <- paste(line2, "v","       ", sep="")
-                                   line3 <- paste(line3, " ", ww[r,1], ",", ww[r,2],"    ", sep="")
-                         }    # p   999
-
-                         if(p >= 10 & p <= 99){
-                                   line2 <- paste(line2, "v","     ", sep="")
-                                   line3 <- paste(line3, " ", ww[r,1], ",", ww[r,2],"  ", sep="")
-                         }    #p 99
-
-                         if(p <= 9){
-                                   line2 <- paste(line2, "v","   ", sep="")
-                                   line3 <- paste(line3, " ", ww[r,1], ",", ww[r,2], sep="")
-                         }     # p 9
-                    }   # r
-                    line2 <- paste(line2, "                       ", lineno)
-                    cat(c(line2,line3),sep=linereturn)
-                    cat(c(" "," "),sep=linereturn)
- 
-                    cat(c(line2,line3),file=parseguide,sep=linereturn,append=TRUE)
-                    cat(c(" "," "),file=parseguide,sep=linereturn,append=TRUE)
+                    ww <- my.html.product(ww)  
+                    ww <- paste(primeline2, ww, "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", lineno, "<br>", sep="")
+                    cat(ww, file=parseguide, sep=linereturn, append=TRUE)
+                    if(j==1)primeline2 <- "&nbsp;+&nbsp;"
                     lineno <- lineno + 1
-               }     # m
-               primeline2 <- " - "
-          }     # j 
-     }       # not symmetric
+               }      #  m
+               primeline2 <- "&nbsp;-&nbsp;"
+               cat("</p>",file=parseguide, sep=linereturn, append=TRUE)
+          }           #  j
+          cat("</body>", file=parseguide, sep=linereturn, append=TRUE)
+          cat("</html>", file=parseguide, sep=linereturn, append=TRUE)
+          utils::browseURL(parseguide, browser = browser)
+     }   # not symmetric
+     #
      if(verbose) {
           print("", quote = FALSE)
           print("Finished running parsedetguide", quote = FALSE)

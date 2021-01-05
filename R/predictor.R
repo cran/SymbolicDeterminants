@@ -47,24 +47,19 @@ function(p, verbose=TRUE)
 
     line14 <- "Three additional spaces are used in each line for the sign of the product."
 
-    line15 <- "The number of lines required depends upon p and whether the matrix is symmetric."  
-    line16 <- "The p!/2 Plus terms are printed and then the same number of Minus terms. Each term requires" 
-    line17 <- "4 lines: 1 for the exponent, 1 for the matrix symbol, 1 for the subscripts, and one space" 
-    line18 <- "between line sets. For nonsymmetric matrices, the exponent line is omitted."
+    line15 <- "One line on the page is required for each product in the determinant."
 
     cat(line1,line2,line3,line4,line5,sep=linereturn)
     cat(line7,line8,sep=linereturn)
     cat(line9,line10,line11,line12,sep=linereturn)
-    cat(line14,sep=linereturn)
-    cat(line15,line16,line17,line18,sep=linereturn)
-
+    cat(line14,line15,sep=linereturn)
+    
      print("", quote = F)
-     print(paste("For p=",p,"the number of terms is p!=",prettyNum(prod(1:p),big.mark=","),", half of which"), quote=FALSE)
+     print(paste("For p=",p,"the number of product terms is p!=",prettyNum(prod(1:p),big.mark=","),", half of which"), quote=FALSE)
      print("have a plus sign and half have a minus sign.", quote=FALSE)
      print("", quote = F)
      print(paste("Each product term contains exactly",p,"elements of the matrix."), quote=FALSE)
      print("", quote = F)
-     print(paste("The total number of printed lines is approximately", prettyNum(4*prod(1:p),big.mark=",")), quote=FALSE)
      #
      if(verbose) {
           print("", quote = F)

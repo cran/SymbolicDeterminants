@@ -1,6 +1,6 @@
 \name{confirm.det}
 \alias{confirm.det}
-\title{Confirm Accuracy of Symbolic Determinant Created by makedetguide() Function}
+\title{Confirm Accuracy of Symbolic Determinant Created by anewdetguide() Function}
 \description{
      Compares the determinant calculated by multiplying eigenvalues of a matrix to that
      calculated by applying the symbolic representation created by this package. 

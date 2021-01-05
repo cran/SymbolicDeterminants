@@ -6,24 +6,25 @@
 Retrieves a specified file from storage directory
 }
 \usage{
-retrieve(p, storage, verbose=TRUE)
+retrieve(p, storage, browser="Microsoft Edge", verbose=TRUE)
 }
 \arguments{
   \item{p}{Size of matrix (pxp)}
   \item{storage}{Quoted name of directory for storage of detguides}
+  \item{browser}{Name of program to be used as HTML browser} 
   \item{verbose}{Logical. TRUE causes printing of program ID before and after running}
 }
-\details{Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
+\details{If provide full path in storage, use double backslashes.  Example:  storage="c:\\determinants".  
    If storage directory is in same folder as R Workspace, storage="./name" is sufficient.
    File to be retrieved is indicated interactively from console.
 }
-\value{Selects and retrieves a detguide file from the storage/p subdirectory
-         or displays the symbolic determinant in a text editor
+\value{Selects and retrieves a detguide file from the storage/p/ subdirectory
+         or displays the symbolic determinant in an HTML editor
 }
 \author{
 William R. Fairweather
 }
-\examples{retrieve(p=3,storage=tempdir(), verbose=TRUE)}
+\examples{retrieve(p=3,storage=tempdir(), browser="Microsoft Edge", verbose=TRUE)}
 
 \keyword{symbolicmath}
 \keyword{array}
