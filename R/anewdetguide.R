@@ -1,4 +1,5 @@
 #' @export
+#' @seealso utils browseURL
 anewdetguide <-
 function(p, storage, verbose=TRUE)
 {
@@ -7,17 +8,14 @@ function(p, storage, verbose=TRUE)
      # VALUE     Creates detguides for all p from max.created to p. max.created is variable stored in /storage directory
      #
      # INPUT    p            Matrix size (pxp) for wanted symbolic representation of determinant
-     #          storage      Quoted name of directory for storage of detguides. 
+     #          storage      Quoted name of directory for storage of detguides (ex. "c:/determinants") 
      #
      #          verbose     Logical. TRUE causes printing of program ID before and after running.
      #
-     # DETAILS  Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
-     #              If storage directory is in same folder as R Workspace, storage=".\\name" is sufficient.
-     #  
      MC <- match.call()
      if(verbose) {
           print("", quote = FALSE)
-          print("Running makedetguide", quote = FALSE)
+          print("Running anewdetguide", quote = FALSE)
           print("", quote = FALSE)
           print(date(), quote = FALSE)
           print("", quote = FALSE)

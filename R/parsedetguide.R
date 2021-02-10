@@ -1,7 +1,6 @@
-#' @importFrom utils browseURL
 #' @export
 parsedetguide <-
-function(p, storage, browser="Microsoft Edge", symmetric=FALSE, verbose=TRUE)
+function(p, storage, browser="C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", symmetric=FALSE, verbose=TRUE)
 {
      #                          parsedetguide
      #
@@ -9,16 +8,13 @@ function(p, storage, browser="Microsoft Edge", symmetric=FALSE, verbose=TRUE)
      #             by anewdetguide( ) function.
      #
      # INPUT    p            Size of square matrix (p x p) for which determinant is wanted. (p > 2)
-     #          storage      Quoted name of directory for storage of detguides. 
-     #          browser      Non-empty character string giving the name of the program to be used as the URL browser, for 
-     #                            Windows operating system NULL is OK
+     #          storage      Quoted name of directory for storage of detguides (ex. "c:/determinants") e" is sufficient.
+     #          browser      OPTIONAL. Non-empty character string giving the name of the program to be used as the URL browser. Will
+     #                            be set interactively.
      #          symmetric    TRUE, if representation of determinant for symmetric matrix is wanted.  
      #
      #          verbose     Logical. T causes printing of program ID before and after running.
      #
-     # DETAILS  Provide full path in storage, using double backslashes.  Example:  storage="c:\\determinants".  
-     #              If storage directory is in same folder as R Workspace, storage=".\\name" is sufficient.
-     #  
      MC <- match.call()
      if(verbose) {
           print("", quote = FALSE)
@@ -100,6 +96,33 @@ function(p, storage, browser="Microsoft Edge", symmetric=FALSE, verbose=TRUE)
 
      linereturn <- "\n"
      nlinesets <- prod(3:p)    # p! /2
+     #
+     ################################################
+     # Set up browser for various operating systems #
+     ################################################
+     print("", quote = FALSE)
+     print("Let's identify the path to the HTML browser for this computer. ", quote=FALSE)
+     print("", quote = FALSE)
+     questions <- paste( 
+                   "     1. Using a Windows operating system. Let this function supply the path",
+                   "     2. Not using Windows; I entered the path to the HTML browser when I called this function",
+                   "     3. Not using Windows; I want to type in the complete path to the HTML browser now",
+                   "     4. Abort this function; I will go look up the complete path to the HTML browser                  ",
+                   "            ",
+                   sep = "\n")
+     cat(questions, file="")
+     instruction <- "Enter a number from 1 to 4:  "
+     cat(" ", file="")
+     jj <- substring(readline(prompt=instruction),1,1)
+     if(jj != 1 & jj != 2 & jj != 3)stop("Aborting function")
+     if(jj == 1) browser <- NULL
+     if(jj == 2) xnull <- NULL    # no action necessary
+     if(jj == 3){
+          cat(" ", file="")
+          instruction <- "Type the path. Omit quotes:   "
+          browser <- readline(prompt=instruction)
+          cat(" ", file="")
+     }    # jj=3 
      #
      #######################################################
      # Input detguide from storage subdirectory            #

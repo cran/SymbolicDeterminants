@@ -1,3 +1,14 @@
+SymbolicDeterminants 2.0.0
+==========================
+
+-   Added functions to reduce the amount of space used in storing
+    detguides and other functions to process, retrieve, and index   
+    detguides and minidetguides.
+
+-   Made more functions interactive in order to identify HTML
+    browser on non-Windows operating systems.
+
+
 SymbolicDeterminants 1.3.0
 ==========================
 

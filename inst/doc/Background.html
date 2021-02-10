@@ -181,7 +181,7 @@ for a symmetric 2x2 matrix, and not the numeric values for a particular numeric 
 
 <h2>Objective</h2>
 
-<p>Our objective is to provide functions that will return the most efficient symbolic representation of the determinant of any pxp matrix, whether general or symmetric. </p>
+<p>Our objective is to provide functions that will return the most efficient symbolic representation of the determinant of any pxp matrix, whether general or symmetric. We have no interest here in developing a method of calculating the numerical value of the determinant of a square matrix. Rather, we are interested in the literal structure of determinants.</p>
 
 <h2>The detguide</h2>
 
@@ -209,20 +209,27 @@ for a symmetric 2x2 matrix, and not the numeric values for a particular numeric 
 
 <p>For symmetric matrices, as p increases the product terms become more complicated. Instead of strictly linear elements, some of these may be quadratic. It is not possible for any diagonal element of the matrix to appear more than once in any product, so diagonal terms can never be squared in any product. If p=3, there can be only 1 quadratic element in a product. If p=4, there can be none, 1, or 2 quadratic terms. In general, there can be none, 1, 2, …, floor(p/2) quadratic elements. The symbolic representation would treat each of these groups as separate forms.</p>
 
+<h1>Taking on the challenges</h1>
+
+<p>We note from the formula for the determinant provided by Leibniz and cited in Wikipedia - Leibniz Formula for Determinants, that the symbolic representation can be written directly without the need to employ determinants of the minors of a given row. This saves considerable storage space. Moreover, there are relationships between the products with leading + signs and those with leading - signs that allows us to save only the minidetguide, the part of the detguide with leading + sign. Finally, by subdividing the minidetguide into products having the same leading matrix element and storing them accordingly, we can omit both the leading element and the notation indicating the row of each element. In the Leibniz formula, the row is always 1,2,3,&hellip;,p for each element of a product.</p>
+
+<p>What we have done is to reduce the storage requirement at the cost of greater processing time for parsing the minidetguide into the symbolic representation of the determinant. In fact, we could eliminate the storage requirement entirely by writing a function that creates the minidetguide and parses it in one step. For large p, it seems that such a function would take a very long time to run even though it does not involve determinants of lower order.</p>
+
+<h1>Discussion</h1>
+
+<p>In this version of the package, we are aware of only a few possible forms and that some products can appear twice in the detguide of symmetric matrices. As we gain experience with larger and larger values of p, it is possible (for example) that products could appear even 4 times in a symbolic representation (doubling the presence of products that appear twice for smaller p). We would expect to modify the *parsedetguide( )* or *parsemini()* function to accommodate this. These functions include a coefficient to account for multiple product terms. For such terms, the original line number is maintained (with the duplicated lines skipped).</p>
+
+<p>Parsing the detguide is the end result of these calculations. New explorations into the structure of determinants should be conducted on the detguide, not on the parsed, textual version.</p>
+
 <h1>Use of the functions included in the package</h1>
 
 <p>Please see the README file.</p>
 
-<h1>Discussion</h1>
-
-<p>In this version of the package, we are aware of only a few possible forms and that some products can appear twice in the detguide of symmetric matrices. As we gain experience with larger and larger values of p, it is possible (for example) that products could appear even 4 times in a symbolic representation (doubling the presence of products that appear twice for smaller p). We would expect to modify the *parsedetguide( )* function to accommodate this. The
-*parsedetguide( )* function includes a coefficient of 2 for product terms that are doubled. For such terms, the original line number is maintained (with the second line skipped).</p>
-
-<p>Parsing the detguide is the end result of these calculations. New explorations into the structure of determinants should be conducted on the detguide, not on the parsed, textual version.</p>
-
-<h1>Reference</h1>
+<h1>References</h1>
 
 <p>Laplace, Pierre-Simon (de) (1772). &ldquo;Researches sur le calcul intégral et sur le systéme du monde,&rdquo; Histoire de l&#39;Académie Royale des Sciences (Paris), seconde partie, pages 267–376.</p>
+
+<p>Wikipedia - Leibniz Formula for Determinants, last accessed 30 January 2021.</p>
 
 </body>
 

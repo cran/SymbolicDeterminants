@@ -18,7 +18,7 @@
 \author{
 William R. Fairweather
 }
-\examples{\dontrun{confirm.det(x=NULL, p=3,storage=tempdidr(),verbose=TRUE)}
-}
+\examples{confirm.det(x=NULL, p=5,storage=tempdir(),verbose=TRUE)}
+
 \keyword{symbolmath }
 \keyword{array }
